@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id              String   @id @default(cuid())
+  productName     String
+  productType     String?
+  targetAudience  String?
+  painPoints      String?
+  sellingPoints   String?
+  priceInfo       String?
+  scheduleInfo    String?
+  processInfo     String?
+  cta             String?
+  notes           String?
+  stylePreference String?
+  materials       String
+  briefJson       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  prompts PromptPackage[]
+  assets  GeneratedAsset[]
+}
+
+model BrandProfile {
+  id             String   @id @default(cuid())
+  brandName      String
+  primaryColor   String
+  secondaryColor String?
+  styleKeywords  String
+  toneKeywords   String
+  layoutHabits   String
+  bannedClaims   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ImageApiConfig {
+  id          String   @id @default(cuid())
+  provider    String
+  apiKey      String?
+  baseUrl     String?
+  model       String?
+  defaultSize String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PromptPackage {
+  id             String   @id @default(cuid())
+  campaignId     String
+  materialType   String
+  materialName   String
+  size           String
+  visualPrompt   String
+  copyPrompt     String
+  negativePrompt String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  campaign Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  assets   GeneratedAsset[]
+}
+
+model GeneratedAsset {
+  id              String   @id @default(cuid())
+  campaignId      String
+  promptPackageId String?
+  materialType    String
+  materialName    String
+  size            String
+  imageUrl        String?
+  status          String
+  provider        String?
+  model           String?
+  errorMessage    String?
+  qualityReport   String?
+  isFinal         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  campaign      Campaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  promptPackage PromptPackage? @relation(fields: [promptPackageId], references: [id], onDelete: SetNull)
+}
